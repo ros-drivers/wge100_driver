@@ -1,0 +1,129 @@
+Welcome to Xilinx CORE Generator.
+Help system initialised.
+Wrote project file
+/wg/stor2c/jamesb/wge100_firmware/trunk/rtl/verilog/coregen/pixfifo.cgp
+Wrote project file
+/wg/stor2c/jamesb/wge100_firmware/trunk/rtl/verilog/coregen/pixfifo.cgp
+WARNING:sim:381 - Unable to determine location of PDF viewer
+Customizing IP...
+Finished Customizing.
+Generating IP...
+XST: HDL Compilation
+XST: Design Hierarchy Analysis
+XST: HDL Analysis
+XST: HDL Synthesis
+XST: Advanced HDL Synthesis
+XST: Low Level Synthesis
+XST: Partition Report
+XST: Final Report
+Generating Implementation files.
+Locking assertion failure.  Backtrace:
+#0 /usr/lib/libxcb-xlib.so.0 [0x6cc13767]
+#1 /usr/lib/libxcb-xlib.so.0(xcb_xlib_unlock+0x31) [0x6cc138b1]
+#2 /usr/lib/libX11.so.6(_XReply+0xfd) [0x6b68c1bd]
+#3 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/xawt/libmawt.so [0x6b784d3e]
+#4 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/xawt/libmawt.so [0x6b76ed47]
+#5 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/xawt/libmawt.so [0x6b76eec3]
+#6
+/opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/xawt/libmawt.so(Java_sun_awt_X11Graph
+icsEnvironment_initDisplay+0x26) [0x6b76f106]
+#7 [0xb1572ba8]
+#8 [0xb156cb6b]
+#9 [0xb156cb6b]
+#10 [0xb156a234]
+#11 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/server/libjvm.so [0xb762675c]
+#12 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/server/libjvm.so [0xb77f4b48]
+#13 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/server/libjvm.so [0xb762658f]
+#14
+/opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/server/libjvm.so(JVM_DoPrivileged+0x3
+2d) [0xb7683d7d]
+#15
+/opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/libjava.so(Java_java_security_AccessC
+ontroller_doPrivileged__Ljava_security_PrivilegedAction_2+0x3d) [0xb70e52cd]
+#16 [0xb15724d8]
+#17 [0xb156ca94]
+#18 [0xb156a234]
+#19 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/server/libjvm.so [0xb762675c]
+Locking assertion failure.  Backtrace:
+#0 /usr/lib/libxcb-xlib.so.0 [0x6cc13767]
+#1 /usr/lib/libxcb-xlib.so.0(xcb_xlib_lock+0x2e) [0x6cc1381e]
+#2 /usr/lib/libX11.so.6 [0x6b68b518]
+#3 /usr/lib/libX11.so.6(XGetVisualInfo+0x26) [0x6b6820a6]
+#4 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/xawt/libmawt.so [0x6b76e089]
+#5 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/xawt/libmawt.so [0x6b76e2d3]
+#6 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/xawt/libmawt.so [0x6b76ef71]
+#7
+/opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/xawt/libmawt.so(Java_sun_awt_X11Graph
+icsEnvironment_initDisplay+0x26) [0x6b76f106]
+#8 [0xb1572ba8]
+#9 [0xb156cb6b]
+#10 [0xb156cb6b]
+#11 [0xb156a234]
+#12 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/server/libjvm.so [0xb762675c]
+#13 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/server/libjvm.so [0xb77f4b48]
+#14 /opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/server/libjvm.so [0xb762658f]
+#15
+/opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/server/libjvm.so(JVM_DoPrivileged+0x3
+2d) [0xb7683d7d]
+#16
+/opt/Xilinx/11.1/ISE/java/lin/jre/lib/i386/libjava.so(Java_java_security_AccessC
+ontroller_doPrivileged__Ljava_security_PrivilegedAction_2+0x3d) [0xb70e52cd]
+#17 [0xb15724d8]
+#18 [0xb156ca94]
+#19 [0xb156a234]
+Generating NGC file.
+Finished Generation Stage.
+Generating ISE file...
+Finished ISE file generation.
+Generating FLIST file...
+Finished FLIST file generation.
+Preparing output directory...
+Finished preparing output directory.
+Moving files to output directory...
+Finished moving files to output directory.
+Generating IP...
+WARNING:sim:89 - A core named <fifo_generator_v5_1> already exists in the output
+   directory. Output products for this core may be overwritten.
+XST: HDL Compilation
+XST: Design Hierarchy Analysis
+XST: HDL Analysis
+XST: HDL Synthesis
+XST: Advanced HDL Synthesis
+XST: Low Level Synthesis
+Generating Implementation files.
+Generating NGC file.
+Finished Generation Stage.
+Generating ISE file...
+Finished ISE file generation.
+Generating FLIST file...
+Finished FLIST file generation.
+Preparing output directory...
+Finished preparing output directory.
+Moving files to output directory...
+Finished moving files to output directory.
+Generating IP...
+WARNING:sim:89 - A core named <pixfifo> already exists in the output directory.
+   Output products for this core may be overwritten.
+XST: HDL Compilation
+XST: Design Hierarchy Analysis
+XST: HDL Analysis
+XST: HDL Synthesis
+XST: Advanced HDL Synthesis
+XST: Low Level Synthesis
+Generating Implementation files.
+Generating NGC file.
+Finished Generation Stage.
+Generating ISE file...
+Finished ISE file generation.
+Generating FLIST file...
+Finished FLIST file generation.
+Preparing output directory...
+Finished preparing output directory.
+Moving files to output directory...
+Finished moving files to output directory.
+WARNING:sim:381 - Unable to determine location of PDF viewer
+Recustomizing IP...
+WARNING:sim:254 - Unable to launch pdf viewerCancelled Recustomization.
+Wrote project file
+/wg/stor2c/jamesb/wge100_firmware/trunk/rtl/verilog/coregen/pixfifo.cgp
+Closed project file.

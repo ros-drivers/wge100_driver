@@ -1,0 +1,12 @@
+# python tools/scope.py ; exit
+# gforth -e 'include epa.fs bye' ; exit
+# svn revert wge.fs ; python changer.py wge.fs ; exit
+# ./cs.py ; exit
+tput clear
+# make j1.mem && diff lst lst.golden | head
+# make download && sudo python tools/listenterminal.py
+
+make wge100_ip_camera.mcs j1.bin && cp j1.bin wge100_ip_camera.mcs tools/* $HOME/bundle/
+make wge100_ip_camera.bit && ./send wge100_ip_camera.bit && sudo python tools/listenterminal.py
+# make wge100_ip_camera.mcs && rosrun wge100_camera upload_mcs wge100_ip_camera.mcs serial://13
+# make j1.bin && python tools/bootloader.py j1.bin 10.0.1.116 && sudo python tools/listenterminal.py

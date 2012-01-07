@@ -1,0 +1,16 @@
+Automatic - Pure data streaming.  Destination MAC/IP/Port address is fixed.
+  Framing is performed automatically by the core.  Frame boundary is
+  when either the input fifo is empty, or the frame is too big.
+
+Semi-automatic - Data streaming with optional eof delimiters.  Same as
+  before, but there is an extra bit in the input fifo which can force
+  a frame break.
+
+Manual-breaks - Manual frame breaks. Same as before but with no
+  automatic framing.  Any frame that is too big is discarded.  If the
+  fifo becomes empty before the end of the frame, the frame is
+  discarded.
+
+Manual - Manual frames.  Same as before, but the MAC address and
+  EthType of each frame is sent as the first words of the frame.
+

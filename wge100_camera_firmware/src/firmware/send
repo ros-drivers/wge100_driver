@@ -1,0 +1,18 @@
+# Uncomment this to get a listing of the contents of the new .bit file
+#data2mem -i -bm ../../synth/programming_files/latest/wge100_bd.bmm \
+#-bt wge100_ip_camera.bit -d > 1
+
+# Generate the .mcs file from the .bit file; .mcs is used to program the PROM, see 
+# http://www.ros.org/wiki/wge100_camera/AdvancedCommandLine#Reflashing_the_Camera_Firmware:_upload_mcs
+
+# linux32 promgen -w -p mcs -c FF -o wge100_ip_camera.mcs -u 0 wge100_ip_camera.bit >/dev/null
+
+(echo setmode -bscan;
+        echo setcable -p auto;
+        echo identify;
+        echo assignfile -p 1 -file \"${1}\";
+        echo program -p 1;
+        echo quit) > wge100_ip_camera.impactram
+
+. /opt/Xilinx/11.1/ISE/settings32.sh;
+linux32 impact -batch wge100_ip_camera.impactram # >/dev/null 2>/dev/null

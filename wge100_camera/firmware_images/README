@@ -1,0 +1,12 @@
+To update the camera firmware on the PR2, do the following:
+
+1. Get a recent ros tree.
+2. Build wge100_camera
+3. Make sure that no wge100 drivers are running on either machine (this is
+VERY IMPORTANT)
+4. roscd wge100_camera/firmware_images/
+5. ./update_robot.sh
+
+This will take a couple of minutes to run, and will update all the robot's
+cameras. If the forearm cameras are not connected, you will get
+corresponding errors that you can feel free to ignore.

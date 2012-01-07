@@ -1,0 +1,56 @@
+<!-- 
+Runs a wge100 camera.
+
+Change the camera_url to match your camera. 
+You can use "rosrun wge100_camera discover" to find the URL of your camera.
+You may need to specify an IP address after the URL of the camera if the
+camera is not configured for your network. Eg: serial://2701034@192.168.1.2
+
+You can uncomment the viewer if you want to view the image stream. 
+
+-->
+
+<launch>
+  <!-- The camera node -->
+  
+  <node name="wge100_camera_demo" pkg="wge100_camera" type="wge100_camera_node" output="screen">
+    <param name="camera_url" type="str" value="any://" />
+    <param name="imager_rate" type="double" value="25" />
+    <remap from="camera" to="wge100_demo" />
+  </node>
+
+      <!-- 
+      Uncomment below if you want to view the image stream on a monochrome
+      camera. (You will see the Bayer coded image on a color camera)
+  
+      You will have to run the following command first, however:
+      $ rosmake image_view
+      -->
+
+  <!--
+  <node pkg="image_view" type="image_view" respawn="false" name="wge100_camera_demo_viewer_mono">
+    <param name="autosize" type="bool" value="True" />
+    <param name="window_name" type="str" value="'Forearm Camera (Mono)'" />
+    <remap from="image" to="wge100_demo/image_raw" />
+  </node>
+  --> 
+
+      <!-- 
+      Uncomment below if you want to view the image stream on a color
+      camera.
+  
+      You will have to run the following command first, however:
+      $ rosmake image_view image_proc
+      -->
+  <!--
+  <node ns="wge100_demo" pkg="image_proc" type="image_proc" respawn="false" name="wge100_camera_demo_image_proc" />
+  <node pkg="image_view" type="image_view" respawn="false" name="wge100_camera_demo_viewer_color">
+    <param name="autosize" type="bool" value="True" />
+    <param name="window_name" type="str" value="'WGE100 Camera (Color)'" />
+    <remap from="image" to="wge100_demo/image_color" />
+  </node>
+  -->
+
+</launch>
+
+

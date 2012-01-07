@@ -1,0 +1,18 @@
+<launch>
+
+  <!-- The simulator -->
+  <node name="wge100_simulator" pkg="wge100_camera" type="wge100_sim" output="screen"/>
+
+  <!-- The camera node -->
+  <group ns="wge100">
+    <param name="camera_url" type="str" value="serial://12345@127.0.0.1#lo"/>
+    <param name="width" type="int" value="320"/>
+    <param name="height" type="int" value="200"/>
+    <param name="imager_rate" type="double" value="25"/>
+    <param name="ext_trig" type="bool" value="False"/>
+    <param name="trig_controller" type="string" value=""/>
+    <param name="port" type="int" value="62100"/>
+  </group>
+  <node name="wge100" pkg="wge100_camera" type="wge100_camera_node" respawn="true" output="screen"/>
+
+</launch>

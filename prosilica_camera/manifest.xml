@@ -1,0 +1,28 @@
+<package>
+  <description>A ROS node to provide access to Prosilica cameras.</description>
+  <author>Patrick Mihelich</author>
+  <license>BSD</license>
+  <review status="Doc Reviewed" notes="Jan 22 2010"/>
+
+  <depend package="prosilica_gige_sdk" />
+  <depend package="roscpp" />
+  <depend package="std_msgs" />
+  <depend package="sensor_msgs" />
+  <depend package="diagnostic_updater" />
+  <depend package="diagnostic_msgs" />
+  <depend package="image_transport" />
+  <depend package="self_test" />
+  <depend package="driver_base" />
+  <depend package="dynamic_reconfigure" />
+  <depend package="camera_calibration_parsers" />
+  <depend package="polled_camera" />
+
+  <export>
+    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lprosilica" cflags="-I${prefix}/include -I${prefix}/srv/cpp"/>
+  </export>
+
+  <url>http://www.ros.org/wiki/prosilica_camera</url>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

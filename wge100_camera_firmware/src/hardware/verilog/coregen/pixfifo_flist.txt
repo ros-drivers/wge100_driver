@@ -1,0 +1,15 @@
+# Output products list for <pixfifo>
+_xmsgs/
+fifo_generator_ug175.pdf
+pixfifo.asy
+pixfifo.gise
+pixfifo.ise
+pixfifo.ngc
+pixfifo.v
+pixfifo.veo
+pixfifo.xco
+pixfifo.xise
+pixfifo_flist.txt
+pixfifo_readme.txt
+pixfifo_xdb/tmp/
+pixfifo_xmdf.tcl

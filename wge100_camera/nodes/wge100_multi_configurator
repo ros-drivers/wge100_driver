@@ -1,0 +1,236 @@
+#! /usr/bin/env python
+#*
+#*  Copyright (c) 2009, Willow Garage, Inc.
+#*  All rights reserved.
+#*
+#*  Redistribution and use in source and binary forms, with or without
+#*  modification, are permitted provided that the following conditions
+#*  are met:
+#*
+#*   * Redistributions of source code must retain the above copyright
+#*     notice, this list of conditions and the following disclaimer.
+#*   * Redistributions in binary form must reproduce the above
+#*     copyright notice, this list of conditions and the following
+#*     disclaimer in the documentation and/or other materials provided
+#*     with the distribution.
+#*   * Neither the name of the Willow Garage nor the names of its
+#*     contributors may be used to endorse or promote products derived
+#*     from this software without specific prior written permission.
+#*
+#*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+#*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+#*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+#*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+#*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+#*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+#*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#*  POSSIBILITY OF SUCH DAMAGE.
+#***********************************************************
+
+# Author: Blaise Gassend
+
+from __future__ import with_statement
+
+PACKAGE='wge100_camera'
+import roslib; roslib.load_manifest(PACKAGE)
+import rospy
+import dynamic_reconfigure
+import dynamic_reconfigure.client
+import dynamic_reconfigure.server
+import threading
+import time
+from wge100_camera.cfg import WGE100CameraConfig as CameraConfigType
+from wge100_camera.cfg import WGE100MultiConfiguratorConfig as MultiConfiguratorConfigType
+
+class AsynchronousUpdater(threading.Thread):
+    def __init__(self, f, name):
+        threading.Thread.__init__(self)
+        self.name = name
+        self.f = f
+        self.allargs = None
+        self.cv = threading.Condition()
+        AsynchronousUpdater.updaters.append(self)
+        self.exiting = False
+        self.idle = True
+        self.start()
+
+    def update(self, *args, **nargs):
+        with self.cv:
+            self.allargs = (args, nargs)
+            self.cv.notify()
+            #print "update", self.allargs
+
+    def run(self):
+        #print "run"
+        while True:
+            #print "Starting loop on", self.name
+            with self.cv:
+                if self.exiting:
+                    break
+                if self.allargs == None:
+                  #print "start wait"
+                   self.idle = True
+                   self.cv.wait()
+                   self.idle_end_time = rospy.get_time()
+                   self.idle = False
+                  #print "end wait"
+                allargs = self.allargs
+                self.allargs = None
+            if allargs != None:
+                self.f(*allargs[0], **allargs[1])
+
+    def is_idle(self):
+        with self.cv:
+          return self.idle
+
+    def kill(self):
+        #print "kill"
+        #print "Killing", self.name
+        ## @todo very slow memory leak here when you change the list of nodes. Need to remove from the list of threads.
+        with self.cv:
+            self.exiting = True
+            self.allargs = None
+            self.cv.notify()
+
+    def get_status(self): # For diagnostics
+        if self.idle:
+            return self.name, 0
+        interval = rospy.get_time() - self.idle_end_time
+        return self.name, interval
+
+    @staticmethod
+    def kill_all():
+      for updater in AsynchronousUpdater.updaters:
+        updater.kill()
+      while AsynchronousUpdater.print_threads() > 0:         
+        print "\nStill waiting for all threads to die..."
+        time.sleep(1)
+
+    @staticmethod
+    def print_threads():
+      threads = threading.enumerate()
+      n = 0
+      for t in threads:
+          if not t.isDaemon() and t != threading.currentThread():
+              try: 
+                 print t.name
+              except:
+                  print "Unknown thread ", t
+              n = n + 1
+      return n
+
+AsynchronousUpdater.updaters = []
+
+class WGE100Camera:
+  def __init__(self, name, parent):
+    self.name = name
+    self.parent = parent
+    self.updater = None
+    self.client = dynamic_reconfigure.client.Client(name, config_callback = self.config_callback)
+    self.updater = AsynchronousUpdater(self.client.update_configuration, name)
+    self.config = parent.config
+
+  def update(self, config): # Called in the main thread when we need to send an update to the client
+    self.updater.update(config)
+
+  def config_callback(self, config): # Called when we get the client's state.
+    if self.updater != None and self.updater.is_idle(): # Only pass changes up when they are final. Avoids propagating intermediate values.
+        self.config = self.parent.extract_common_params(config)
+        self.parent.client_changed()
+
+class WGE100MultiConfigurator:
+    def __init__(self):
+        self.lock = threading.RLock()
+        camera_params = dynamic_reconfigure.get_parameter_names(MultiConfiguratorConfigType)
+        reconf_params = dynamic_reconfigure.get_parameter_names(CameraConfigType)
+        self.common_params = [val for val in camera_params if val in reconf_params]
+
+        self.camera_nodes = None # The nodes that are currently in use
+        self.clients = {} # All WGE100Camera classes we have ever instantiated
+        self.nodes = [] # The list of nodes we are currently working with
+        self.config = {}
+        self.config_sets = {}
+        self.server = None
+        self.server = dynamic_reconfigure.server.Server(MultiConfiguratorConfigType, self.reconfigure)
+        self.client_changed() # We could not do the update right away because self.server was not set
+
+    def set_nodes(self, camera_nodes):
+        new_nodes = camera_nodes.split();
+        added_nodes = []
+        if new_nodes != self.camera_nodes:
+          # Are there any new nodes?
+          for node in new_nodes:
+            if not node in self.nodes:
+              added_nodes.append(node)
+          # Update us.
+          self.camera_nodes = camera_nodes
+          for client in new_nodes:
+            if not client in self.clients:
+              self.clients[client] = WGE100Camera(client, self)
+          self.nodes = new_nodes
+        return added_nodes
+
+    def reconfigure(self, config, level):
+      with self.lock:
+        common_config = self.extract_common_params(config)
+
+        # What parameters have changed?
+        changes = {}
+        for (param, value) in common_config.iteritems():
+          if not param in self.config or self.config[param] != value:
+            changes[param] = value
+        self.config = common_config
+
+        # Update the nodes that are being controlled.
+        new_nodes = self.set_nodes(config['camera_nodes'])
+
+        # Update the non-new nodes.
+        if len(changes) != 0:
+          for client in self.nodes:
+            if not client in new_nodes:
+              self.clients[client].update(changes)
+
+        # Update the new nodes.
+        if len(new_nodes) != 0:
+          for client in new_nodes:
+            self.clients[client].update(self.config)
+          
+        return self.create_multiconfigurator_params(config)
+
+    def extract_common_params(self, config):
+      return dict((param, config[param]) for param in self.common_params)
+    
+    def create_multiconfigurator_params(self, config):
+      config = dict(config)
+      config["camera_params"] = self.nodes
+      return config
+
+    def update_config_sets(self):
+      for param in self.common_params:
+        self.config_sets[param] = set(self.clients[client].config[param] for client in self.nodes)
+        #self.config_sets[param].add(self.config[param])
+
+    def client_changed(self):
+      with self.lock:
+        changed = False
+        self.update_config_sets()
+        for param in self.common_params:
+          values = self.config_sets[param]
+          if len(values) == 1:
+            for val in values:
+              if val != self.config[param]: 
+                self.config[param] = val
+                changed = True
+        if changed and self.server != None:
+          self.server.update_configuration(self.config)
+
+if __name__ == '__main__':
+    rospy.init_node('wge100_multi_configurator')
+    handler = WGE100MultiConfigurator()
+    print "Multi-configurator started."
+    rospy.spin()
+    AsynchronousUpdater.kill_all()

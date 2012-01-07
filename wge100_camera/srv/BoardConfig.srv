@@ -1,0 +1,6 @@
+# Used to configure a camera's MAC address and serial number. This is a
+# one-time only operation for a camera.
+uint32 serial # Serial number
+uint8[] mac # MAC address, should be 6 bytes long
+---
+uint8 success # 1 means success, 0 means failure

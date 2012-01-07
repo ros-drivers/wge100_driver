@@ -1,0 +1,627 @@
+\documentclass[11pt]{article}
+\usepackage{pslatex}
+\usepackage{rotating}
+\usepackage{footnote}
+\usepackage{multirow}
+\usepackage{timing}
+
+% commands for register format figures.
+
+\newcommand{\instbit}[1]{\mbox{\scriptsize #1}}
+\newcommand{\instbitrange}[2]{\instbit{#1} \hfill \instbit{#2}}
+
+\setlength{\topmargin}{-0.25in}
+\setlength{\headheight}{0.25in}
+\setlength{\headsep}{0.25in}
+\setlength{\textheight}{8.5in}
+
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+\setlength{\textwidth}{6.5in}
+
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.95}
+
+% Define \colw giving text width in a single column.
+\newlength{\colw}
+\setlength{\colw}{\textwidth}
+
+\makeatother
+
+\renewcommand{\textfraction}{0}
+\renewcommand{\topfraction}{1}
+\renewcommand{\bottomfraction}{1}
+\sloppy
+
+% atb0 specific commands
+
+\pagestyle{myheadings}
+%\pagestyle{empty}
+
+% symbol footnotes
+\long\def\symbolfootnote[#1]#2{\begingroup%
+\def\thefootnote{\fnsymbol{footnote}}\footnote[#1]{#2}\endgroup}
+
+\let\subsubsubsection\paragraph
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+
+
+\begin{document}
+
+\title{\Large \bf Tri-Mode Ethernet MAC v0.1}
+\author{Jared Casper \\ FOSSH}
+\maketitle
+
+\newpage
+
+\newcommand{\headertext}{Tri-Mode Ethernet MAC v0.1}
+\markboth{\headertext}{\headertext}
+
+%%\tableofcontents
+%%\newpage
+
+%%\listoffigures
+%%\newpage
+
+%% \listoftables
+%% \newpage
+
+\section{Introduction}
+
+FOSSH's Tri-mode Ethernet MAC core was designed from the ground up to
+be a compact, fast, no-frills core to faciliate streaming data from a
+widget to a connected computer.  Because the core is meant to be small
+and fast, many features that are not often used or would not be useful
+for streaming data are left out.  For example, the core only supports
+full-duplex operation in that it does not even look at the CRS
+(carrier-sense) and COL (collision detection) signals from the PHY.
+That said, it does have features not present in other cores to make it
+easy to stream data.  For example, it will generate the ethernet and
+udp headers for you so you can simple give it data and it will take
+care of sending it for you.  
+
+The core is in active development and this document describes version
+0.1.
+
+\subsection{Features}
+
+Features that are implemented and functional:
+
+\begin{itemize}
+
+\item Interfaces with the PHY using GMII running 10/100/1000 Mb/s.
+  Support for RGMII is planned.
+
+\item Full-duplex support only.
+
+\item Raw ethernet frame generation, allowing a pure data input stream.
+
+\item Optional UDP/IP packet generation with automatic packetization and
+  framentation of an input data stream.
+
+\item Input and output fifos decoupled from the core logic, so the
+  clock rate of application logic is not tied to the speed of the
+  ethernet link (barring bandwidth issues).
+
+\item Full core uses 288 Spartan 6 logic slices and 2 block RAMs.  For
+  comparison, the smallest Spartan 6 has 600 slices and 12 block RAMs.
+  The largest Spartan 6 has 23,038 slices and 268 block RAMs.
+
+\end{itemize}
+
+\noindent Features that are in development or planned:
+
+\begin{itemize}
+
+
+\item Multiple input/output fifo for streams to be sent to/from
+  different addresses.
+
+\item Optional configuration registers instead of configuration ports
+  for use with a micro controller.
+
+\item Automatic flow control via PAUSE frames.
+
+\item RGMII interface.
+
+\end{itemize}
+
+\subsection{Obtaining}
+
+Stable releases of the MAC core can be downloaded from
+http://www.fossh.com/.  Read-only public access to the development
+repository is available using git at the respository
+git://jcasper.stanford.edu/fossh/repo.git.
+
+\section{Interface}
+
+\subsection{Parameters}
+\begin{tabular}{lcp{4.0in}}
+\hline
+Name & Type & Description \\
+\hline
+
+\hline USR\_CLK\_PERIOD & Integer & Period, in ns, of usr\_clk.
+Needed to to generate a sutable clock for the mii management port
+(mdc) from usr\_clk. \\
+
+\hline RX\_CRC\_CHECK & Boolean & If true, the CRC of incoming packets
+will be checked for accuracy.  If false, no such check is performed. \\
+
+\hline
+\end{tabular}
+
+\subsection{Clocks, etc.}
+\begin{tabular}{p{0.85in}ccp{4.0in}}
+\hline
+Name & Width & Direction & Description \\
+\hline
+
+\hline usr\_clk & 1 & I & User clock used to clock data into and out
+of the core through the user and management interfaces. \\
+
+\hline clk\_125 & 1 & I & 125 MHz clock used to supply phy\_GTX\_CLK. \\
+
+\hline reset\_n & 1 & I & Active-low reset.  Resets all flops and
+buffers in the core. \\
+
+\hline debug & * & O & Various signals used during debugging. \\
+\hline
+\end{tabular}
+
+\subsection{User Interface}
+
+All signals in the user interface are synchronous with usr\_clk.
+
+\subsubsection{Configuration}
+
+Instead of implementing internal registers to indicate the source and
+destination MAC address, these values are simply ports into the core.
+This allowed the implementation to be expanded to a wider variety of
+future interfaces.  An optional wrapper is in development that will
+add registers to the management interface
+(Section~\ref{sec:management}) and remove these ports.
+
+The following ports are part of the base MAC module and are always used:
+\begin{tabular}{p{0.85in}ccp{4.0in}}
+\hline
+Name & Width & Direction & Description \\
+\hline
+
+\hline gmii & 1 & I & Indicate that the core should be communicate
+with the phy in GMII mode (i.e. 1Gbit/s).  Otherwise MII mode
+(10/100Mbit/s) will be used. Unfortunately there doesn't appear to be
+a standard way to get the negotiated link speed from the PHY (why is
+this not in the 802.3 standard is beyond me). \\
+
+\hline promiscous & 1 & I & Indicate that the core should filter
+incoming packages to those with destination of src\_mac\_addr. \\
+
+\hline jumboframes & 1 & I & Indicates that jumbo frames are okay to
+send. \\
+
+\hline src\_mac\_addr & 48 & I & MAC address to use as the source of
+transmitted ethernet frames and the filter for what received frames to
+not discard when not in promiscous mode. \\
+
+\hline dst\_mac\_addr & 48 & I & MAC address to use as the destination
+of transmitted ethernet frames. \\
+
+\hline ethertype & 16 & I & EtherType/Length field for outgoing packets. \\
+
+\hline ifg & 10 & I & Number of cycles inserted between packets.  Should be $\geq$ 0x0D. \\
+
+\hline
+\end{tabular}
+
+\subsubsection{Transmission}
+\label{sec:tx-iface}
+
+The interface used to send packets/frames is a standard FIFO write
+interface with addition of an end-of-frame port ($tx\_eof$) that is
+used to split incoming data into frames.
+
+\vskip 12pt\noindent\begin{tabular}{p{0.85in}ccp{4.0in}}
+\hline
+Name & Width & Direction & Description \\
+\hline
+
+\hline tx\_data & 32 & I & Data to be sent to the phy for
+transmission.  Data is queued to be sent when tx\_we is high and
+tx\_stop is low.  Following ethernet standards, bytes are sent in big
+endian order\\
+
+\hline tx\_eof & 4 & I & Used to indicate which bytes in the word
+being written (tx\_data) is the last of the frame.  Because data is
+sent big endian, setting tx\_eof[0] to 1 indicates that the entire
+32-bit should be sent (and is the last word in this packet). \\
+
+\hline tx\_we & 1 & I & Write enable for transmission.  Queues
+tx\_data to be sent to the phy when tx\_stop is low. \\
+
+\hline tx\_stop & 1 & O & Indicates that the input buffers are full
+and no more data can be queued for transmission. \\
+
+\hline 
+\end{tabular}\vskip 12pt
+
+Figure~\ref{fig:timing-trans} illustrates normal transmission of a couple of
+32-bit aligned packets, with the final word of the second packet being
+temporarily stopped by a full input fifo.
+
+\begin{figure}
+\begin{timing}[2s]{0.6in}
+\tin{1}{usr\_clk}  \til{1}{LLLLHHHHLLLLHHHHLL..LLHHHHLLLLHHHHLLLLHHHHLL..LLHHHHLLLLHHHHLLLLHHHH}
+\tin{2}{tx\_data}  \til{2}{UUUUVVVVVVVVXVVVVV..VVXVVVVVVVXVVVVVVVXVVVVV..VVXVVVVVVVVVVVVVVVUUUU}
+\tnote{1.85}{6}{data 1.1}\tnote{1.85}{15}{data 1.x}\tnote{1.85}{24}{data 1.n}
+\tnote{1.85}{32}{data 2.1}\tnote{1.85}{41}{data 2.x}\tnote{1.85}{54}{data 2.n}
+\tin{3}{tx\_eof[0]}\til{3}{LLLLLLLLLLLLLLLLLL..LLHHHHHHHHLLLLLLLLLLLLLL..LLHHHHHHHHHHHHHHHHLLLL}
+\tin{4}{tx\_we}    \til{4}{LLLLHHHHHHHHHFFFFF..FHHHHHHHHHHHHHHHHHHFFFFF..FHHHHHHHHHHHHHHHHHLLLL}
+\tin{5}{tx\_stop}  \til{5}{LLLLLLLLLLLLLLLLLL..LLLLLLLLLLLLLLLLLLLLLLLL..LLHHHHHHHHLLLLLLLLLLLL}
+\sline{0.4}{4}{5.}
+\sline{0.4}{12}{5.}
+\sline{0.4}{22}{5.}
+\sline{0.4}{30}{5.}
+\sline{0.4}{38}{5.}
+\sline{0.4}{48}{5.}
+\sline{0.4}{56}{5.}
+\sline{0.4}{64}{5.}
+\end{timing}
+\caption{Timing diagram of two back to back 32-bit aligned packet
+  transmissions, with the final word of the second packet being
+  interrupted by a full input fifo.}
+\label{fig:timing-trans}
+\end{figure}
+
+If the input fifo runs out of data while the MAC is sending a packet,
+an error condition will be raised and the packet will not be sent.
+Operating at 1Gbps, the PHY will transmit approximately 100MB/s from
+the input fifo.  Therefore, if data word is supplied every clock, the
+user clock must be at least 25 MHz, an easy target for most FPGAs.
+Alternatively, if the user clock is faster, data need not be supplied
+on each clock.  For example, a 100 MHz user clock means that once data
+is first written to the input fifo, the rest of the data can come at a
+rate as slow as one word every 4 clocks.
+
+It is important to note that bytes in tx\_data are sent in big endian
+mode, following ethernet standards.  This means tx\_data[31:16] is
+sent first, followed by tx\_data[15:8], and so on.  Care should be
+taken if value smaller than 32 bits are written and their ordering.
+
+\subsubsection{Reception}
+
+The interface used to receive packets is a standard FIFO read
+interface, with the addition of an end-of-frame port ($rx\_eof$).
+
+\vskip 12pt\noindent\begin{tabular}{p{0.85in}ccp{4.0in}}
+\hline
+Name & Width & Direction & Description \\
+\hline
+
+\hline rx\_data & 32 & O & Data received by the MAC from the
+phy. Valid when rx\_dv is high. \\
+
+\hline rx\_eof & 4 & O & Used to indicate that rx\_data is the last
+word in the received frame. Mapped to rx\_data just as tx\_eof maps to
+tx\_data. \\
+
+\hline rx\_dv & 1 & O & Indicates that rx\_data is valid data that was
+received by the MAC. \\
+
+\hline rx\_ack & 1 & I & Acknowledges the receipt of rx\_data and
+causes the MAC to move to the next received word. \\
+
+\hline
+\end{tabular}\vskip 12pt
+
+\noindent Figure~\ref{fig:timing-recp} illustrating the timing of
+receiving a packet.  If the user logic does not empty the reception
+fifo fast enough, it will fill up and the the MAC will drop incoming frames.  
+
+\begin{figure}
+\begin{timing}[2s]{0.6in}
+\tin{1}{usr\_clk}  \til{1}{LLLLHHHHLLLLHHHHLL..LLHHHHLLLLHHHHLLLLHHHHLL..LLHHHHLLLLHHHHLLLLHHHH}
+\tin{2}{rx\_data}  \til{2}{UUUUVVVVVVVVXVVVVV..VVXVVVVVVVXVVVVVVVXVVVVV..VVXVVVVVVVVVVVVVVVUUUU}
+\tnote{1.85}{6}{data 1.1}\tnote{1.85}{15}{data 1.x}\tnote{1.85}{24}{data 1.n}
+\tnote{1.85}{32}{data 2.1}\tnote{1.85}{41}{data 2.x}\tnote{1.85}{54}{data 2.n}
+\tin{3}{rx\_eof[0]}\til{3}{LLLLLLLLLLLLLLLLLL..LLHHHHHHHHLLLLLLLLLLLLLL..LLHHHHHHHHHHHHHHHHLLLL}
+\tin{4}{rx\_dv}    \til{4}{LLLLHHHHHHHHHFFFFF..FHHHHHHHHHHHHHHHHHHFFFFF..FHHHHHHHHHHHHHHHHHLLLL}
+\tin{5}{rx\_ack}   \til{5}{LLLLLLLHHHHHHFFFFF..FHHHHHHHHHHHHHHHHHHFFFFF..FFLLLLLLLLHHHHHHHHLLLL}
+\sline{0.4}{4}{5.}
+\sline{0.4}{12}{5.}
+\sline{0.4}{22}{5.}
+\sline{0.4}{30}{5.}
+\sline{0.4}{38}{5.}
+\sline{0.4}{48}{5.}
+\sline{0.4}{56}{5.}
+\sline{0.4}{64}{5.}
+\end{timing}
+\caption{Timing diagram of receiving two back to back 32-bit aligned
+  packets, with the final word of the second packet being interrupted
+  by the user.}
+\label{fig:timing-recp}
+\end{figure}
+
+
+\subsubsection{Management}
+\label{sec:management}
+
+The following ports are used to read and write the MII management
+registers on the PHY.  If they are left unconnected, the MII
+management module will be optimized away by the synthesis tools.
+
+\vskip 12pt\noindent\begin{tabular}{p{0.85in}ccp{4.0in}}
+\hline
+Name & Width & Direction & Description \\
+\hline
+
+\hline miim\_phyad & 5  & I & Management address of the PHY to
+communicate with. \\
+
+\hline miim\_addr  & 5  & I & Address of PHY register to read/write
+to. \\
+
+\hline miim\_wdata & 16 & I & Data to write to the PHY register. \\
+
+\hline miim\_we    & 1  & I & Write Enable, write miim\_wdata to the PHY
+register miim\_addr. \\
+
+\hline miim\_rdata & 16 & O & Data read from the PHY register. \\
+
+\hline miim\_req   & 1  & I & Sends a read request to the PHY for
+miim\_addr. \\
+
+\hline miim\_ack   & 1  & O & Indicates that the requested operation
+(read or write) has been performed.  If a read was requested,
+miim\_rdata contains the data read from the PHY. \\
+
+\hline
+\end{tabular}
+
+The management interface is a simple memory-style read/write
+interface.  To read a management register, put the address on
+\texttt{miim\_phyad} and \texttt{miim\_addr} and hold
+\texttt{miim\_req} high until \texttt{miim\_ack} is raised.
+\texttt{miim\_rdata} will hold the read data the cycle
+\texttt{miim\_ack} is raised.  This is shown in
+Figure~\ref{fig:timing-miim-rd}.
+
+\begin{figure}
+\begin{timing}[2s]{1in}
+\tin{1}{usr\_clk}    \til{1}{LLLLHHHHLLLLHHHHLL....LLHHHHLLLLHHHHLLLLHHHHLL}
+\tin{2}{miim\_phyad} \til{2}{UUUUVVVVVVVVVVVVVV....VVVVVVVVVVVVVVVVVVUUUUUU}
+\tin{3}{miim\_addr}  \til{3}{UUUUVVVVVVVVVVVVVV....VVVVVVVVVVVVVVVVVVUUUUUU}
+\tin{4}{miim\_req}   \til{4}{LLLLHHHHHHHHHHHHHH....HHHHHHHHHHHHHHHHHHLLLLLL}
+\tin{5}{miim\_we}    \til{5}{LLLLLLLLLLLLLLLLLL....LLLLLLLLLLLLLLLLLLLLLLLL}
+\tin{6}{miim\_ack}   \til{6}{LLLLLLLLLLLLLLLLLL....LLLLLLLLLLHHHHHHHHLLLLLL}
+\tin{7}{miim\_rdata} \til{7}{UUUUUUUUUUUUUUUUUU....UUUUUUUUUUVVVVVVVVUUUUUU}
+\sline{0.4}{4}{5.}
+\sline{0.4}{12}{5.}
+\sline{0.4}{22}{5.}
+\sline{0.4}{30}{5.}
+\sline{0.4}{38}{5.}
+\end{timing}
+\caption{Timing diagram of MII management read.}
+\label{fig:timing-miim-rd}
+\end{figure}
+
+To perform a write to the management register, hold
+\texttt{miim\_phyad}, \texttt{miim\_addr}, and \texttt{miim\_wdata}
+valid and \texttt{miim\_we} and \texttt{miim\_req} high until
+\texttt{miim\_ack} is asserted, at which point the write has been
+performed.  This is illustrated in Figure~\ref{fig:timing-miim-wr}.
+
+\begin{figure}
+\begin{timing}[2s]{1in}
+\tin{1}{usr\_clk}    \til{1}{LLLLHHHHLLLLHHHHLL....LLHHHHLLLLHHHHLLLLHHHHLL}
+\tin{2}{miim\_phyad} \til{2}{UUUUVVVVVVVVVVVVVV....VVVVVVVVVVVVVVVVVVUUUUUU}
+\tin{3}{miim\_addr}  \til{3}{UUUUVVVVVVVVVVVVVV....VVVVVVVVVVVVVVVVVVUUUUUU}
+\tin{4}{miim\_req}   \til{4}{LLLLHHHHHHHHHHHHHH....HHHHHHHHHHHHHHHHHHLLLLLL}
+\tin{5}{miim\_we}    \til{5}{LLLLHHHHHHHHHHHHHH....HHHHHHHHHHHHHHHHHHLLLLLL}
+\tin{6}{miim\_ack}   \til{6}{LLLLLLLLLLLLLLLLLL....LLLLLLLLLLHHHHHHHHLLLLLL}
+\tin{7}{miim\_wdata} \til{7}{UUUUVVVVVVVVVVVVVV....VVVVVVVVVVVVVVVVVVUUUUUU}
+\sline{0.4}{4}{5.}
+\sline{0.4}{12}{5.}
+\sline{0.4}{22}{5.}
+\sline{0.4}{30}{5.}
+\sline{0.4}{38}{5.}
+\end{timing}
+\caption{Timing diagram of MII management write.}
+\label{fig:timing-miim-wr}
+\end{figure}
+
+\subsection{UDP/IP Wrapper}
+
+When the UDP/IP Wrapper is used, the ethertype port is removed and the
+following configuration ports are added.
+
+\vskip 12pt\noindent\begin{tabular}{p{0.85in}ccp{4.0in}}
+\hline
+Name & Width & Direction & Description \\
+\hline
+
+\hline src\_ip & 32 & I & IP address to use as the source of
+trasmitted UDP/IP packets. \\
+
+\hline src\_port & 16 & I & UDP port to use as the source of
+transmitted UDP/IP packets. \\
+
+\hline dst\_ip & 32 & I & IP address to send UDP/IP packets to. \\
+
+\hline dst\_port & 16 & I & UDP port to send UDP/IP packets to. \\
+
+\hline ttl & 8 & I & Value for the initial Time-To-Live field of
+UDP/IP packets. \\
+
+\hline
+\end{tabular}\vskip 12pt
+
+The transmission, reception, and management ports are all the same,
+except instead of a four bit tx\_eof, there is a single bit tx\_eop,
+because the UDP wrapper currently does not support sending sub 32-bit
+aligned packets. 
+
+\subsection{PHY}
+
+The PHY ports are the standard GMII ports that should be tied directly
+to pins connected to an ethernet PHY.
+
+\begin{tabular}{p{0.85in}ccp{4.0in}}
+\hline
+Name & Width & Direction & Description \\
+\hline
+
+phy\_TXD      & 8 & O & \multirow{11}{4.0in}{These pins are the standard
+  MII/GMII interface pins described numerous other places.} \\
+phy\_TX\_EN   & 1 & O & \\
+phy\_TX\_ER   & 1 & O & \\ 
+phy\_TX\_CLK  & 1 & I & \\
+phy\_GTX\_CLK & 1 & O & \\
+phy\_RXD      & 8 & I & \\
+phy\_RX\_DV   & 1 & I & \\
+phy\_RX\_ER   & 1 & I & \\
+phy\_RX\_CLK  & 1 & I & \\
+phy\_MDC      & 1 & O & \\
+phy\_MDIO     & 1 & IO & \\
+\hline
+\end{tabular}
+
+\section{Architecture}
+
+The MAC core is split up into three main components: tranmission,
+reception, and reconciliation.  Figure\~ref{fig:mac-blocks} shows a
+block diagram of how these components work together.  The transmission
+blocks, \textbf{txfifo}, \textbf{tx\_engine}, and \textbf{crc\_gen},
+are responsible for taking user data and sending it to the
+reconciliation module, which sends it to the ethernet phy.  Likewise
+the recption blocks, \textbf{rx\_usr\_if}, \textbf{rx\_pkt\_fifo},
+\textbf{rxfifo}, \textbf{rx\_engine}, and \textbf{crc\_chk}, are
+responsible for taking data from the reconciliation layer, throwing
+away bad frames, and presenting it to the user.  The reconciliation
+layer handles with the GMII interface to the phy and deals with
+differences between 10/100Mbit operation and gigabit operation.
+
+I have tried to make the verilog as readable and nicely commented as
+possible, so hopefully the code is self documenting.  This section
+just gives an overview of how things work.
+
+\begin{figure}
+\centering \includegraphics[width=\textwidth]{figs/mac-blocks.pdf}
+\caption{Block diagram of the MAC core.}
+\label{fig:mac-blocks}
+\end{figure}
+
+\subsection{Reconciliation}
+
+The reconcilation modules provides a common interface to the rest of
+the core regardless of the speed of the ethernet link.  This is done
+by providing internal clocks to both the tx (\texttt{int\_tx\_clk})
+and rx (\texttt{int\_rx\_clk}) modules which can be used to send data
+to the reconciliation layer eight bits a clock.  
+
+If \texttt{gmii} is high we are operating at gigabit speeds and the
+phy sends and receives a full eight bits of data each 8ns.  For
+transmission, \texttt{clk\_125} is used as both \texttt{int\_tx\_clk}
+and sent as \texttt{phy\_GTXCLK}, synchronizing all tranmission to
+that one 125 MHz clock.  Likewise, all reception is synchronized to
+the 125 MHz \texttt{phy\_RXCLK}, which is sent as
+\texttt{int\_rx\_clk}.
+
+if \texttt{gmii} is low we are operating at 10 or 100 Mbits per second
+and only four bits of the databus to the phy is used.  For
+transmission, the phy expects four bits every cycle of the phy
+supplied \texttt{phy\_TXCLK}; to maintain an eight bit interface with
+the rest of the mac, \texttt{phy\_TXCLK} is divided in half and sent
+as \texttt{int\_tx\_clk}.  Likewise, the phy sends four bits every
+\texttt{phy\_RXCLK}, so this is divided in half and sent as
+\texttt{int\_rx\_clk}.
+
+\subsection{Transmission}
+
+For transmission, \textbf{tx\_engine} runs a simple state machine
+which controls what is sent to the reconciliation layer, pulling data
+from the configuration ports for the header, \textbf{txfifo}, a 36 bit
+wide asynchronous fifo, for the payload, and \textbf{crc\_gen} for the
+final CRC checksum.  \textbf{txfifo} is 36 bits wide to hold both the
+data and the corresponding end of frame bits.
+
+If \textbf{txfifo} runs out of data, \textbf{tx\_engine} raises
+\texttt{phy\_TXER} to drop the packet being sent and continues to
+drain \textbf{txfifo} until an end-of-frame is indicated.  It then
+moves on to the next packet in \textbf{txfifo}.
+
+A frame being sent will also be dropped if the frame ends too early or
+too late.  A frame must be 46 bytes long to be sent. The
+\texttt{jumobframes} input changes when \textbf{tx\_engine} thinks a
+frame as grown too large and should be dropped.  If
+\texttt{jumboframes} is low, the frame will be dropped if larger than
+1500 bytes, otherwise it will be dropped if larger than 9000. Note
+that the phy may or may not accept frames larger than the standard
+1500 bytes, but the MAC has no way of knowing this.
+
+Once a packet has successfully been sent, \textbf{tx\_engine} wait for
+an inter frame gap, set by the \texttt{IFG} parameter to the
+\textbf{tx\_engine} module, which defaults to 12 cycles and begin
+sending the next frame if it is available.
+
+\subsection{Reception}
+
+Reception is controlled by both \textbf{rx\_engine} and
+\textbf{rx\_usr\_if}.  \textbf{rx\_engine} receives data from the phy
+and passes all the data unaltered, except for the preamble, to the
+\textbf{rxfifo}, once a full packet is received it writes a '1' to the
+single bit asynchronous fifo \textbf{rx\_pkt\_fifo} to indicate to
+\textbf{rx\_usr\_if} that the data in \textbf{rxfifo} is ready to send
+to the user.  If an error is detected during packet reception, either
+because \texttt{phy\_RXER} was asserted, the frame was too short or
+too long, or the destination MAC address didn't match and
+\texttt{promiscuous} was not asserted, then a '0' is written to the
+\textbf{rx\_pkt\_fifo} to indicate to \textbf{rx\_usr\_if} that a bad
+packet is in \textbf{rxfifo}.  \textbf{rx\_usr\_if} will then drain
+the bad packet from \textbf{rxfifo} without ever presenting it to the
+user.
+
+\subsection{Management}
+
+Implementation of the management interface is just a straightforward
+state machine which performs the requested read and write operations
+using the MII managment protocol.  See section 22.2.2 of IEEE
+802.3-2008, or any phy's datasheet, for a description of the protocol.
+
+\subsection{Clocking}
+
+There are six different clock domains within the MAC core, delineated
+by the dotted lines in Figure~\ref{fig:mac-blocks}. 
+
+\begin{itemize}
+\item{\texttt{usr\_clk}} This is the only clock that the user of the MAC needs
+  to be aware of, as all user signals into the MAC are synchronized to
+  this clock.  It can be any speed as long as it is fast enough as
+  detailed in Section~\ref{sec:tx-iface}.
+
+\item{\texttt{int\_tx\_clk}} This clock is used by all of the transmission
+  modules and is generated by the reconciliation layer depending on
+  the speed of the ethernet link. It is either \texttt{clk\_125} or
+  half of \texttt{phy\_TXCLK}.
+
+\item{\texttt{int\_rx\_clk}} The reception version of \texttt{int\_tx\_clk},
+  also generated by the reconiliation layer.  It is either
+  \texttt{phy\_RXCLK} or half of \texttt{phy\_RXCLK}.
+
+\item{\texttt{phy\_TXCLK/phy\_GTXCLK}} This is used to clock data out of the
+  FPGA to the phy.  \texttt{phy\_TXCLK} is supplied by the phy and
+  \texttt{phy\_GTXCLK} is \texttt{clk\_125}.
+
+\item{\texttt{phy\_RXCLK}} This is used to clock data into the FPGA from the
+  phy and is supplied by the phy.
+
+\item{phy\_MDC} This is used to clock data in and out of the phy's
+  management port.  It is generated from \texttt{usr\_clk} based on
+  the \texttt{USR\_CLK\_PERIOD} parameter to the MAC core.  It should
+  have a period greater than 400ns as per section 22.2.2.11 of IEEE
+  802.3-2008.
+\end{itemize}
+
+\end{document}

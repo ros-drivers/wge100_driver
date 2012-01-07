@@ -1,0 +1,35 @@
+// BMM LOC annotation file.
+//
+// Release 11.1i - Data2MEM L.33, build 1.5.8 Jul 23, 2008
+// Copyright (c) 1995-2010 Xilinx, Inc.  All rights reserved.
+//
+// Created on 12/17/10 01:46 pm
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Unnamed 405 PPC processor, ID 0, memory map.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Address space 'jram' 0x00020000:0x00023FFF (16 KB).
+//
+///////////////////////////////////////////////////////////////////////////////
+
+ADDRESS_SPACE jram RAMB16 [0x00020000:0x00023FFF]
+    BUS_BLOCK
+        j1/ram[7].ram [15:14] PLACED = X1Y3;
+        j1/ram[6].ram [13:12] PLACED = X1Y4;
+        j1/ram[5].ram [11:10] PLACED = X1Y2;
+        j1/ram[4].ram [9:8] PLACED = X1Y5;
+        j1/ram[3].ram [7:6] PLACED = X1Y0;
+        j1/ram[2].ram [5:4] PLACED = X1Y1;
+        j1/ram[1].ram [3:2] PLACED = X1Y7;
+        j1/ram[0].ram [1:0] PLACED = X1Y6;
+    END_BUS_BLOCK;
+END_ADDRESS_SPACE;
+

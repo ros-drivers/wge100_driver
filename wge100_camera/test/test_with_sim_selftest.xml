@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- The simulator -->
+  <include file="$(find wge100_camera)/test/test_with_sim.launch" />
+
+  <!-- Self-test test -->
+  <test test-name="selftest" pkg="self_test" type="selftest_rostest" name="selftest">
+    <param name="node_to_test" type="string" value="wge100" />
+    <param name="delay" type="double" value="3" />
+  </test>
+
+</launch>

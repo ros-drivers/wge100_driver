@@ -1,0 +1,3 @@
+rosbuild_add_executable(stress_discover stress_discover.cpp)
+target_link_libraries(stress_discover wge100camera)
+

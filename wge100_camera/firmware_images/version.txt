@@ -1,0 +1,1 @@
+HDL rev: 600 FW rev: 8C41

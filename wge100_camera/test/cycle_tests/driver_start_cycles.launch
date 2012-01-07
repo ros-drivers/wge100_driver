@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="wge100_camera" type="wge100_camera_node" name="wge100_driver_cycle_test" respawn="true">
+    <param name="camera_url" value="name://narrow_stereo_l"/>
+  </node>
+  <node name="wge100_driver_cycle_test_recorder" type="rosrecord" pkg="rosrecord" args="-f wge100_cycle_test /camera/image_raw"/>
+  <node name="wge100_driver_cycle_test_killer" type="driver_start_cycles.sh" pkg="wge100_camera" output="screen"/>
+</launch>

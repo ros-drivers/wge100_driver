@@ -1,0 +1,15 @@
+<launch>
+
+  <!-- The simulator -->
+  <include file="$(find wge100_camera)/test/test_with_sim.launch" />
+
+  <!-- hztest to make sure images are coming out -->
+  <test test-name="hztest" pkg="rostest" type="hztest" name="hztest">
+    <param name="topic" value="/camera/camera_info" />  
+    <param name="hz" value="20" />
+    <param name="hzerror" value="18" />
+    <param name="test_duration" value="3.0" />
+    <!--param name="check_intervals" value="true" /-->    
+  </test>
+
+</launch>
