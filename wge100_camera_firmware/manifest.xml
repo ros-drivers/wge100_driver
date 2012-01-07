@@ -1,8 +1,9 @@
 <package>
   <description brief="Source for the WGE100 Ethernet camera">
-    Source for the WGE100 Ethernet camera: Verilog source for the FPGA, Forth source for the camera firmware.
-    Intended for camera developers.  Note that a built binary from this
-    package is checked in under wge100_camera/firmware_images/
+    Source for the WGE100 Ethernet camera: Verilog source for the
+    FPGA, Forth source for the camera firmware.  Intended for camera
+    developers.  Note that a built binary from this package is checked
+    in under wge100_camera/firmware_images/
   </description>
   <author>James Bowman, Blaise Gassend. MAC by Jared Casper and Morgan Quigley</author>
   <license>BSD</license>

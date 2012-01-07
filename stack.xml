@@ -1,19 +1,16 @@
 <stack>
-  <description brief="drivers for supported cameras">
-    This stack contains drivers for a variety of cameras, and some
-    associated tools.
+  <description brief="Driver and firmware for WGE100 camera">
+    This stack contains the ROS driver and firmware for the WGE100
+    camera used on the PR2 robot.
   </description>
-  <author>Maintained by Jack O'Quin</author>
-  <license>BSD,LGPL,Commercial,GPL</license>  
+  <author>Maintained by Patrick Mihelich</author>
+  <license>BSD,GPL because of list.h; other files released under BSD,GPL</license>  
   <review status="Doc Reviewed" notes="Jan 22 2010"/>
-  <url>http://ros.org/wiki/camera_drivers</url>
-  <depend stack="camera1394" />
-  <depend stack="common_msgs" /> <!-- sensor_msgs, diagnostic_msgs -->
+  <url>http://ros.org/wiki/wge100_driver</url>
+  <depend stack="common_msgs" /> <!-- sensor_msgs -->
   <depend stack="diagnostics" /> <!-- self_test, diagnostic_updater -->
   <depend stack="driver_common" /> <!-- dynamic_reconfigure, driver_base, timestamp_tools -->
-  <depend stack="geometry" /> <!-- tf -->
-  <depend stack="image_common" /> <!-- polled_camera, camera_info_manager, image_transport, camera_calibration_parsers -->
-  <depend stack="nodelet_core" /> <!-- nodelet -->
+  <depend stack="image_common" /> <!-- image_transport, camera_calibration_parsers -->
   <depend stack="ros" />
   <depend stack="ros_comm" /> <!-- std_msgs, rostest, rospy, roscpp -->
 

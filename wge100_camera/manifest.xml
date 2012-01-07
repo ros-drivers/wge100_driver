@@ -1,5 +1,9 @@
 <package>
-  <description brief="Driver for the WGE100 camera">A ROS node and assorted tools to provide access to the WGE100 camera used in the forearms and the stereo cameras of the PR2 robot.</description>
+  <description brief="Driver for the WGE100 camera">
+    A ROS node and assorted tools to provide access to the WGE100
+    camera used in the forearms and the stereo cameras of the PR2
+    robot.
+  </description>
   <author>Blaise Gassend, Patrick Mihelich, Eric MacIntosh, David Palchak</author>
   <url>http://www.ros.org/wiki/wge100_camera</url>
   <license>GPL because of list.h; other files released under BSD</license>
