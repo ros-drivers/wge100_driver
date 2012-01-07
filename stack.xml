@@ -4,7 +4,7 @@
     camera used on the PR2 robot.
   </description>
   <author>Maintained by Patrick Mihelich</author>
-  <license>BSD,GPL because of list.h; other files released under BSD,GPL</license>  
+  <license>BSD, GPL</license>  
   <review status="Doc Reviewed" notes="Jan 22 2010"/>
   <url>http://ros.org/wiki/wge100_driver</url>
   <depend stack="common_msgs" /> <!-- sensor_msgs -->
