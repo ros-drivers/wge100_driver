@@ -1305,7 +1305,7 @@ private:
     // Receive timestamps through callback
     if (driver_.config_.ext_trig && !driver_.config_.trig_timestamp_topic.empty())
     {
-      void (timestamp_tools::TriggerMatcher::*cb)(const roslib::HeaderConstPtr &) = &timestamp_tools::TriggerMatcher::triggerCallback;
+      void (timestamp_tools::TriggerMatcher::*cb)(const std_msgs::HeaderConstPtr &) = &timestamp_tools::TriggerMatcher::triggerCallback;
       trigger_sub_ = node_handle_.subscribe(driver_.config_.trig_timestamp_topic, 100, cb, &driver_.trigger_matcher_);
     }
     else
