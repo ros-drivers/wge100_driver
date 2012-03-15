@@ -43,6 +43,7 @@ import dynamic_reconfigure.client
 import dynamic_reconfigure.server
 import threading
 import time
+import copy
 from wge100_camera.cfg import WGE100CameraConfig as CameraConfigType
 from wge100_camera.cfg import WGE100MultiConfiguratorConfig as MultiConfiguratorConfigType
 
@@ -205,7 +206,7 @@ class WGE100MultiConfigurator:
       return dict((param, config[param]) for param in self.common_params)
     
     def create_multiconfigurator_params(self, config):
-      config = dict(config)
+      config = copy.copy(config)
       config["camera_params"] = self.nodes
       return config
 
