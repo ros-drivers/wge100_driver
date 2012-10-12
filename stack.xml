@@ -3,7 +3,7 @@
     This stack contains the ROS driver and firmware for the WGE100
     camera used on the PR2 robot.
   </description>
-  <author>Maintained by Patrick Mihelich</author>
+  <author>Patrick Mihelich, Maintained by William Woodall</author>
   <license>BSD,GPL because of list.h; other files released under BSD,GPL</license>  
   <review status="Doc Reviewed" notes="Jan 22 2010"/>
   <url>http://ros.org/wiki/wge100_driver</url>
