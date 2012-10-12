@@ -1,2 +1,3 @@
 rosbuild_add_executable(wge100_camera_node wge100_camera_node.cpp)
 target_link_libraries(wge100_camera_node wge100camera)
+rosbuild_link_boost(wge100_camera_node thread)
