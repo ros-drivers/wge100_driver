@@ -1,0 +1,43 @@
+<package>
+  <name>wge100_camera</name>
+  <description>
+    A ROS node and assorted tools to provide access to the WGE100
+    camera used in the forearms and the stereo cameras of the PR2
+    robot.
+  </description>
+  <version>0.0.0</version>
+  <maintainer email="wjwwood@gmail.com">William Woodall</maintainer>
+  <author>Blaise Gassend, Patrick Mihelich, Eric MacIntosh, David Palchak</author>
+  <url type="website">http://www.ros.org/wiki/wge100_camera</url>
+  <license>GPL because of list.h; other files released under BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>diagnostic_updater</build_depend>
+  <build_depend>driver_base</build_depend>
+  <build_depend>self_test</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>camera_calibration_parsers</build_depend>
+  <build_depend>timestamp_tools</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>message_generation</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>diagnostic_updater</run_depend>
+  <run_depend>driver_base</run_depend>
+  <run_depend>self_test</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>camera_calibration_parsers</run_depend>
+  <run_depend>timestamp_tools</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>message_runtime</run_depend>
+
+  <test_depend>rostest</test_depend>
+</package>

@@ -1,24 +1,56 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(wge100_camera)
 
-set(ROS_BUILD_TYPE RelWithDebInfo)
-rosbuild_init()
+find_package(catkin REQUIRED 
+   roscpp
+   rospy
+   diagnostic_updater 
+   driver_base 
+   self_test 
+   dynamic_reconfigure 
+   camera_calibration_parsers 
+   timestamp_tools 
+   image_transport 
+   std_msgs 
+   sensor_msgs 
+   message_generation
+)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+find_package(Boost REQUIRED)
 
-rosbuild_find_ros_package(dynamic_reconfigure)
-include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-rosbuild_add_boost_directories()
+# generating dynamic configure parameters
+# TODO: add dependency to node that actual uses this
+generate_dynamic_reconfigure_options(
+  cfg/WGE100Camera.cfg 
+  cfg/WGE100MultiConfigurator.cfg
+)
 
-rosbuild_add_rostest(test/test_with_sim_hztest.xml)
-rosbuild_add_rostest(test/test_with_sim_selftest.xml)
+# service generation
+add_service_files(
+  DIRECTORY srv
+  FILES
+  BoardConfig.srv
+)
 
-#FIXME Remove next line at some point
-#rosbuild_remove_compile_flags(wge100_camera -W) 
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+)
 
-gencfg()
-rosbuild_gensrv()
+# package definition
+catkin_package(
+  CATKIN_DEPENDS message_runtime
+)
 
-add_subdirectory(src)
-add_subdirectory(test)
+# OLD ROSBUILD-STUFF, TODO: STILL TO BE PORTED TO CATKIN
+#add_rostest(test/test_with_sim_hztest.xml)
+#add_rostest(test/test_with_sim_selftest.xml)
+# add_subdirectory(src)
+# add_subdirectory(test)
+
+# TODO: INSTALL?
+
+# TODO: python scripts?
