@@ -7,7 +7,10 @@
     developers.  Note that a built binary from this package is checked
     in under wge100_camera/firmware_images/
   </description>
-  <author>James Bowman, Blaise Gassend. MAC by Jared Casper and Morgan Quigley</author>
+  <author>James Bowman</author>
+  <author>Blaise Gassend</author>
+  <author>MAC by Jared Casper and Morgan Quigley</author>
+
   <maintainer email="wjwwood@gmail.com">William Woodall</maintainer>  
   <url type="website">http://ros.org/wiki/wge100_camera_firmware</url>
   <license>BSD</license>

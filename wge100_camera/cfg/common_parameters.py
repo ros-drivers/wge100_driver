@@ -36,10 +36,9 @@
 # WGE100 camera configuration, non camera-specific settings.
 
 PACKAGE='wge100_camera'
-import roslib; roslib.load_manifest(PACKAGE)
 
 from driver_base.msg import SensorLevels
-from dynamic_reconfigure.parameter_generator import *
+from dynamic_reconfigure.parameter_generator_catkin import *
 
 def add_others(gen):
         enum_register_set = gen.enum([
