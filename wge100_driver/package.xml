@@ -1,6 +1,6 @@
 <package>
   <name>wge100_driver</name>
-  <version>1.8.1</version>
+  <version>1.8.2</version>
   <description>
     This stack contains the ROS driver and firmware for the WGE100 camera used on the PR2 robot.
   </description>
