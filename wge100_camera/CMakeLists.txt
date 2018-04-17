@@ -38,6 +38,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   sensor_msgs
+  driver_base
 )
 
 # package definition
