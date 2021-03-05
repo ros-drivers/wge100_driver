@@ -118,9 +118,9 @@ class AsynchronousUpdater(threading.Thread):
       for t in threads:
           if not t.isDaemon() and t != threading.currentThread():
               try: 
-                 print t.name
+                 print (t.name)
               except:
-                  print "Unknown thread ", t
+                  print ("Unknown thread ", t)
               n = n + 1
       return n
 
@@ -232,6 +232,6 @@ class WGE100MultiConfigurator:
 if __name__ == '__main__':
     rospy.init_node('wge100_multi_configurator')
     handler = WGE100MultiConfigurator()
-    print "Multi-configurator started."
+    print ("Multi-configurator started.")
     rospy.spin()
     AsynchronousUpdater.kill_all()

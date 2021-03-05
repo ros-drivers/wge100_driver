@@ -101,7 +101,8 @@ add_executable(stress_discover test/cycle_tests/stress_discover.cpp)
 target_link_libraries(stress_discover wge100camera)
 
 add_rostest(test/test_with_sim_hztest.xml)
-add_rostest(test/test_with_sim_selftest.xml)
+# self_test/run_selftest is deprecated, see: http://wiki.ros.org/self_test
+#add_rostest(test/test_with_sim_selftest.xml)
 
 # INSTALL
 install(TARGETS 
