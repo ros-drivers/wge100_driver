@@ -2,8 +2,8 @@
 Changelog for package wge100_camera_firmware
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.8.3 (2021-03-07)
+------------------
 * removed deprecated test, updated CMakeLists.txt for new policy
 * updated changelogs
 * Contributors: Dave Feil-Seifer, David Feil-Seifer

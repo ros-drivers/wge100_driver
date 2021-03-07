@@ -2,8 +2,8 @@
 Changelog for package wge100_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.8.3 (2021-03-07)
+------------------
 * removed deprecated test, updated CMakeLists.txt for new policy
 * updated files for compile on focal/noetic
 * updated changelogs

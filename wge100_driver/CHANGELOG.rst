@@ -2,8 +2,8 @@
 Changelog for package wge100_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.8.3 (2021-03-07)
+------------------
 * updated CMake minimum version to solve cmake policy issues
 * updated changelogs
 * Contributors: Dave Feil-Seifer, David Feil-Seifer
