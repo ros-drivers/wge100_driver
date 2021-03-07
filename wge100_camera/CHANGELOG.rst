@@ -4,6 +4,12 @@ Changelog for package wge100_camera
 
 Forthcoming
 -----------
+* removed deprecated test, updated CMakeLists.txt for new policy
+* updated files for compile on focal/noetic
+* updated changelogs
+* fixed dependency issue with message generation in wge100_camera
+* Contributors: Dave Feil-Seifer, David Feil-Seifer
+
 * fixed dependency issue with message generation in wge100_camera
 * Contributors: David Feil-Seifer
 
