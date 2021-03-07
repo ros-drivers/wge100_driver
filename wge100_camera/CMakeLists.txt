@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(wge100_camera)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(catkin REQUIRED 
    roscpp
@@ -38,6 +39,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   sensor_msgs
+  driver_base
 )
 
 # package definition
@@ -99,7 +101,8 @@ add_executable(stress_discover test/cycle_tests/stress_discover.cpp)
 target_link_libraries(stress_discover wge100camera)
 
 add_rostest(test/test_with_sim_hztest.xml)
-add_rostest(test/test_with_sim_selftest.xml)
+# self_test/run_selftest is deprecated, see: http://wiki.ros.org/self_test
+#add_rostest(test/test_with_sim_selftest.xml)
 
 # INSTALL
 install(TARGETS 
