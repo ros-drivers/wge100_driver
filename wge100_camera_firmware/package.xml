@@ -1,6 +1,6 @@
 <package>
   <name>wge100_camera_firmware</name>
-  <version>1.8.4</version>
+  <version>1.8.5</version>
   <description >
     Source for the WGE100 Ethernet camera: Verilog source for the
     FPGA, Forth source for the camera firmware.  Intended for camera

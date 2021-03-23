@@ -5,7 +5,7 @@
     camera used in the forearms and the stereo cameras of the PR2
     robot.
   </description>
-  <version>1.8.4</version>
+  <version>1.8.5</version>
   <maintainer email="ahendrix@willowgarage.com">Austin Hendrix</maintainer>  
   <author>Blaise Gassend, Patrick Mihelich, Eric MacIntosh, David Palchak</author>
   <url type="website">http://www.ros.org/wiki/wge100_camera</url>

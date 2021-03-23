@@ -8,8 +8,8 @@ Changelog for package wge100_driver
 * updated changelogs
 * Contributors: Dave Feil-Seifer, David Feil-Seifer
 
-Forthcoming
------------
+1.8.5 (2021-03-23)
+------------------
 
 1.8.2 (2013-07-16)
 ------------------
