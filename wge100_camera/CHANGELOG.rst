@@ -13,6 +13,9 @@ Changelog for package wge100_camera
 * fixed dependency issue with message generation in wge100_camera
 * Contributors: David Feil-Seifer
 
+Forthcoming
+-----------
+
 1.8.2 (2013-07-16)
 ------------------
 * Fix install rule.
