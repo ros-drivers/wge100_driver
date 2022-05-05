@@ -108,7 +108,7 @@ class AsynchronousUpdater(threading.Thread):
       for updater in AsynchronousUpdater.updaters:
         updater.kill()
       while AsynchronousUpdater.print_threads() > 0:         
-        print "\nStill waiting for all threads to die..."
+        print("\nStill waiting for all threads to die...")
         time.sleep(1)
 
     @staticmethod
@@ -118,9 +118,9 @@ class AsynchronousUpdater(threading.Thread):
       for t in threads:
           if not t.isDaemon() and t != threading.currentThread():
               try: 
-                 print t.name
+                 print(t.name)
               except:
-                  print "Unknown thread ", t
+                  print("Unknown thread " + str(t))
               n = n + 1
       return n
 
@@ -181,7 +181,7 @@ class WGE100MultiConfigurator:
 
         # What parameters have changed?
         changes = {}
-        for (param, value) in common_config.iteritems():
+        for (param, value) in common_config.items():
           if not param in self.config or self.config[param] != value:
             changes[param] = value
         self.config = common_config
@@ -232,6 +232,6 @@ class WGE100MultiConfigurator:
 if __name__ == '__main__':
     rospy.init_node('wge100_multi_configurator')
     handler = WGE100MultiConfigurator()
-    print "Multi-configurator started."
+    print("Multi-configurator started.")
     rospy.spin()
     AsynchronousUpdater.kill_all()
