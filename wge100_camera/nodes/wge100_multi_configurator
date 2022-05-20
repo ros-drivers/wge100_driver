@@ -73,12 +73,12 @@ class AsynchronousUpdater(threading.Thread):
                 if self.exiting:
                     break
                 if self.allargs == None:
-                  #print "start wait"
-                   self.idle = True
-                   self.cv.wait()
-                   self.idle_end_time = rospy.get_time()
-                   self.idle = False
-                  #print "end wait"
+                    #print "start wait"
+                    self.idle = True
+                    self.cv.wait()
+                    self.idle_end_time = rospy.get_time()
+                    self.idle = False
+                    #print "end wait"
                 allargs = self.allargs
                 self.allargs = None
             if allargs != None:
@@ -86,7 +86,7 @@ class AsynchronousUpdater(threading.Thread):
 
     def is_idle(self):
         with self.cv:
-          return self.idle
+            return self.idle
 
     def kill(self):
         #print "kill"
@@ -105,43 +105,43 @@ class AsynchronousUpdater(threading.Thread):
 
     @staticmethod
     def kill_all():
-      for updater in AsynchronousUpdater.updaters:
-        updater.kill()
-      while AsynchronousUpdater.print_threads() > 0:         
-        print("\nStill waiting for all threads to die...")
-        time.sleep(1)
+        for updater in AsynchronousUpdater.updaters:
+            updater.kill()
+        while AsynchronousUpdater.print_threads() > 0:         
+            print("\nStill waiting for all threads to die...")
+            time.sleep(1)
 
     @staticmethod
     def print_threads():
-      threads = threading.enumerate()
-      n = 0
-      for t in threads:
-          if not t.isDaemon() and t != threading.currentThread():
-              try: 
-                 print(t.name)
-              except:
-                  print("Unknown thread " + str(t))
-              n = n + 1
-      return n
+        threads = threading.enumerate()
+        n = 0
+        for t in threads:
+            if not t.isDaemon() and t != threading.currentThread():
+                try: 
+                    print(t.name)
+                except:
+                    print("Unknown thread " + str(t))
+                n = n + 1
+        return n
 
 AsynchronousUpdater.updaters = []
 
 class WGE100Camera:
-  def __init__(self, name, parent):
-    self.name = name
-    self.parent = parent
-    self.updater = None
-    self.client = dynamic_reconfigure.client.Client(name, config_callback = self.config_callback)
-    self.updater = AsynchronousUpdater(self.client.update_configuration, name)
-    self.config = parent.config
+    def __init__(self, name, parent):
+        self.name = name
+        self.parent = parent
+        self.updater = None
+        self.client = dynamic_reconfigure.client.Client(name, config_callback = self.config_callback)
+        self.updater = AsynchronousUpdater(self.client.update_configuration, name)
+        self.config = parent.config
 
-  def update(self, config): # Called in the main thread when we need to send an update to the client
-    self.updater.update(config)
+    def update(self, config): # Called in the main thread when we need to send an update to the client
+        self.updater.update(config)
 
-  def config_callback(self, config): # Called when we get the client's state.
-    if self.updater != None and self.updater.is_idle(): # Only pass changes up when they are final. Avoids propagating intermediate values.
-        self.config = self.parent.extract_common_params(config)
-        self.parent.client_changed()
+    def config_callback(self, config): # Called when we get the client's state.
+        if self.updater != None and self.updater.is_idle(): # Only pass changes up when they are final. Avoids propagating intermediate values.
+            self.config = self.parent.extract_common_params(config)
+            self.parent.client_changed()
 
 class WGE100MultiConfigurator:
     def __init__(self):
@@ -163,71 +163,71 @@ class WGE100MultiConfigurator:
         new_nodes = camera_nodes.split();
         added_nodes = []
         if new_nodes != self.camera_nodes:
-          # Are there any new nodes?
-          for node in new_nodes:
-            if not node in self.nodes:
-              added_nodes.append(node)
-          # Update us.
-          self.camera_nodes = camera_nodes
-          for client in new_nodes:
-            if not client in self.clients:
-              self.clients[client] = WGE100Camera(client, self)
-          self.nodes = new_nodes
+            # Are there any new nodes?
+            for node in new_nodes:
+                if not node in self.nodes:
+                    added_nodes.append(node)
+            # Update us.
+            self.camera_nodes = camera_nodes
+            for client in new_nodes:
+                if not client in self.clients:
+                    self.clients[client] = WGE100Camera(client, self)
+            self.nodes = new_nodes
         return added_nodes
 
     def reconfigure(self, config, level):
-      with self.lock:
-        common_config = self.extract_common_params(config)
+        with self.lock:
+            common_config = self.extract_common_params(config)
 
-        # What parameters have changed?
-        changes = {}
-        for (param, value) in common_config.items():
-          if not param in self.config or self.config[param] != value:
-            changes[param] = value
-        self.config = common_config
+            # What parameters have changed?
+            changes = {}
+            for (param, value) in common_config.items():
+                if not param in self.config or self.config[param] != value:
+                    changes[param] = value
+            self.config = common_config
 
-        # Update the nodes that are being controlled.
-        new_nodes = self.set_nodes(config['camera_nodes'])
+            # Update the nodes that are being controlled.
+            new_nodes = self.set_nodes(config['camera_nodes'])
 
-        # Update the non-new nodes.
-        if len(changes) != 0:
-          for client in self.nodes:
-            if not client in new_nodes:
-              self.clients[client].update(changes)
+            # Update the non-new nodes.
+            if len(changes) != 0:
+                for client in self.nodes:
+                    if not client in new_nodes:
+                        self.clients[client].update(changes)
 
-        # Update the new nodes.
-        if len(new_nodes) != 0:
-          for client in new_nodes:
-            self.clients[client].update(self.config)
-          
-        return self.create_multiconfigurator_params(config)
+            # Update the new nodes.
+            if len(new_nodes) != 0:
+                for client in new_nodes:
+                    self.clients[client].update(self.config)
+              
+            return self.create_multiconfigurator_params(config)
 
     def extract_common_params(self, config):
-      return dict((param, config[param]) for param in self.common_params)
+        return dict((param, config[param]) for param in self.common_params)
     
     def create_multiconfigurator_params(self, config):
-      config = copy.copy(config)
-      config["camera_params"] = self.nodes
-      return config
+        config = copy.copy(config)
+        config["camera_params"] = self.nodes
+        return config
 
     def update_config_sets(self):
-      for param in self.common_params:
-        self.config_sets[param] = set(self.clients[client].config[param] for client in self.nodes)
-        #self.config_sets[param].add(self.config[param])
+        for param in self.common_params:
+            self.config_sets[param] = set(self.clients[client].config[param] for client in self.nodes)
+            #self.config_sets[param].add(self.config[param])
 
     def client_changed(self):
-      with self.lock:
-        changed = False
-        self.update_config_sets()
-        for param in self.common_params:
-          values = self.config_sets[param]
-          if len(values) == 1:
-            for val in values:
-              if val != self.config[param]: 
-                self.config[param] = val
-                changed = True
-        if changed and self.server != None:
-          self.server.update_configuration(self.config)
+        with self.lock:
+            changed = False
+            self.update_config_sets()
+            for param in self.common_params:
+                values = self.config_sets[param]
+                if len(values) == 1:
+                    for val in values:
+                        if val != self.config[param]: 
+                            self.config[param] = val
+                            changed = True
+            if changed and self.server != None:
+                self.server.update_configuration(self.config)
 
 if __name__ == '__main__':
     rospy.init_node('wge100_multi_configurator')
